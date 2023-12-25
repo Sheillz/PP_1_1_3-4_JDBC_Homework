@@ -6,7 +6,6 @@ import jm.task.core.jdbc.util.Util;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Util.getConnection());
         Util.getConnection();
         UserDao userDao = new UserDaoJDBCImpl();
 
@@ -19,7 +18,7 @@ public class Main {
 
         userDao.removeUserById(5);
         userDao.getAllUsers();
-        // userDao.cleanUsersTable();
+        userDao.cleanUsersTable();
         userDao.dropUsersTable();
     }
 }
