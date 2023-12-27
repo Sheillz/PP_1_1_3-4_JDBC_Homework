@@ -10,13 +10,13 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
     Connection connection = Util.getConnection();
-    public UserDaoJDBCImpl() {
-
-    }
+    public UserDaoJDBCImpl() {}
     @Override
     public void createUsersTable() {
         try (Statement statement = connection.createStatement()){
-            statement.executeUpdate( "CREATE TABLE  IF NOT EXISTS user " + "(id INT  NOT NULL AUTO_INCREMENT,  name VARCHAR(100), lastName VARCHAR(100), age INT,PRIMARY KEY(id))");
+            statement.executeUpdate( "CREATE TABLE  IF NOT EXISTS user " +
+                    "(id serial,  name VARCHAR(100), " +
+                    "lastName VARCHAR(100), age  smallint,PRIMARY KEY(id))");
         } catch (SQLException e) {
             System.out.println("An error occurred while creating the table" + e.getMessage());
             throw new RuntimeException(e);
@@ -61,12 +61,11 @@ public class UserDaoJDBCImpl implements UserDao {
         try (Statement statement = connection.createStatement()){
             ResultSet rs  = statement.executeQuery("SELECT * FROM user");
             while (rs.next()){
-                long id = rs.getLong("id");
-                String name = rs.getString("name");
-                String lastName = rs.getString("lastName");
-                byte age = rs.getByte("age");
-                User user = new User(name,lastName,age);
-                user.setId(id);
+                User user = new User();
+                user.setId(rs.getLong("id"));
+                user.setName(rs.getString("name"));
+                user.setLastName(rs.getString("lastName"));
+                user.setAge(rs.getByte("age"));
                 addList.add(user);
             }
         } catch (SQLException e) {
