@@ -7,82 +7,80 @@ import jm.task.core.jdbc.util.Util;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserDaoJDBCImpl implements UserDao {
-    Connection connection = Util.getConnection();
+    private static final Logger logger = Logger.getLogger(UserDaoHibernateImpl.class.getName());
     public UserDaoJDBCImpl() {}
     @Override
     public void createUsersTable() {
-        try (Statement statement = connection.createStatement()){
+        try (Statement statement = Util.getConnection().createStatement()){
             statement.executeUpdate( "CREATE TABLE  IF NOT EXISTS user " +
                     "(id BIGINT not NULL AUTO_INCREMENT,  name VARCHAR(100), " +
                     "lastName VARCHAR(100), age  SMALLINT,PRIMARY KEY(id))");
         } catch (SQLException e) {
-            System.out.println("An error occurred while creating the table" + e.getMessage());
+            logger.info("An error occurred while creating the table" + e.getMessage());
             throw new RuntimeException(e);
         }
-        System.out.println("DB created successful by JDBC");
+        logger.info("DB created successful by JDBC");
     }
     @Override
     public void dropUsersTable() {
-        try (Statement statement = connection.createStatement()) {
+        try (Statement statement = Util.getConnection().createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS user");
         } catch (SQLException e) {
-            System.out.println("An error occurred while trying to drop" + e.getMessage());
+            logger.info("An error occurred while trying to drop" + e.getMessage());
             throw new RuntimeException(e);
         }
-        System.out.println("The table was successfully drop");
+        logger.info("The table was successfully drop");
     }
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        try (Statement statement = connection.createStatement()) {
+        try (Statement statement = Util.getConnection().createStatement()) {
             statement.executeUpdate( "INSERT INTO user(name, lastName, age) " +
                     "VALUES('" + name + "', '" + lastName + "', '" + age + "')");
         } catch (SQLException e) {
-            System.out.println("An error occurred while trying to save" + e.getMessage());
+            logger.info("An error occurred while trying to save" + e.getMessage());
             throw new RuntimeException(e);
         }
-        System.out.println("The save was successful");
+        logger.info("The save was successful");
     }
     @Override
     public void removeUserById(long id) {
-        try ( PreparedStatement preparedStatement = connection.prepareStatement( "DELETE FROM user WHERE id = ? ")){
+        try ( PreparedStatement preparedStatement = Util.getConnection().prepareStatement( "DELETE FROM user WHERE id = ? ")){
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("An error occurred when trying to remove by id" + e.getMessage());
+            logger.info("An error occurred when trying to remove by id" + e.getMessage());
             throw new RuntimeException(e);
         }
-        System.out.println("The remove by id was successful");
+        logger.info("The remove by id was successful");
     }
     @Override
     public List<User> getAllUsers() {
         List<User> addList = new ArrayList<>();
-        try (Statement statement = connection.createStatement()){
-            ResultSet rs  = statement.executeQuery("SELECT * FROM user");
+        try (PreparedStatement preparedStatement = Util.getConnection().prepareStatement("SELECT * FROM user");
+             ResultSet rs  = preparedStatement.executeQuery(); ){
             while (rs.next()){
-                User user = new User();
+                User user = new User( rs.getString("name"),rs.getString("lastName"),rs.getByte("age"));
                 user.setId(rs.getLong("id"));
-                user.setName(rs.getString("name"));
-                user.setLastName(rs.getString("lastName"));
-                user.setAge(rs.getByte("age"));
                 addList.add(user);
             }
         } catch (SQLException e) {
-            System.out.println("An error occurred while trying to get all users" + e.getMessage());
+            logger.info("An error occurred while trying to get all users" + e.getMessage());
             throw new RuntimeException(e);
         }
-        System.out.println("All users have been successfully get");
+        logger.info("All users have been successfully get");
         return addList;
     }
     @Override
     public void cleanUsersTable() {
-        try (Statement statement = connection.createStatement()){
+        try (Statement statement = Util.getConnection().createStatement()){
             statement.executeUpdate("TRUNCATE TABLE user");
         } catch (SQLException e) {
-            System.out.println("An error occurred while trying to clean users table" + e.getMessage());
+            logger.info("An error occurred while trying to clean users table" + e.getMessage());
             throw new RuntimeException(e);
         }
-        System.out.println("Clean users table is completed");
+        logger.info("Clean users table is completed");
     }
 }
