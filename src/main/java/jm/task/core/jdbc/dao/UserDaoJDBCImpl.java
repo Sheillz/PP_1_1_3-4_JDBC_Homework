@@ -1,20 +1,19 @@
 package jm.task.core.jdbc.dao;
 
-
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private static final Logger logger = Logger.getLogger(UserDaoHibernateImpl.class.getName());
+    private  final Logger logger = Logger.getLogger(UserDaoHibernateImpl.class.getName());
+    private final Connection connection = Util.getConnection();
     public UserDaoJDBCImpl() {}
     @Override
     public void createUsersTable() {
-        try (Statement statement = Util.getConnection().createStatement()){
+        try (Statement statement = connection.createStatement()){
             statement.executeUpdate( "CREATE TABLE  IF NOT EXISTS user " +
                     "(id BIGINT not NULL AUTO_INCREMENT,  name VARCHAR(100), " +
                     "lastName VARCHAR(100), age  SMALLINT,PRIMARY KEY(id))");
@@ -26,7 +25,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
     @Override
     public void dropUsersTable() {
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS user");
         } catch (SQLException e) {
             logger.info("An error occurred while trying to drop" + e.getMessage());
@@ -36,7 +35,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Statement statement = connection.createStatement()) {
             statement.executeUpdate( "INSERT INTO user(name, lastName, age) " +
                     "VALUES('" + name + "', '" + lastName + "', '" + age + "')");
         } catch (SQLException e) {
@@ -47,7 +46,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
     @Override
     public void removeUserById(long id) {
-        try ( PreparedStatement preparedStatement = Util.getConnection().prepareStatement( "DELETE FROM user WHERE id = ? ")){
+        try ( PreparedStatement preparedStatement = connection.prepareStatement( "DELETE FROM user WHERE id = ? ")){
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -59,7 +58,7 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public List<User> getAllUsers() {
         List<User> addList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = Util.getConnection().prepareStatement("SELECT * FROM user");
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user");
              ResultSet rs  = preparedStatement.executeQuery(); ){
             while (rs.next()){
                 User user = new User( rs.getString("name"),rs.getString("lastName"),rs.getByte("age"));
@@ -75,7 +74,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
     @Override
     public void cleanUsersTable() {
-        try (Statement statement = Util.getConnection().createStatement()){
+        try (Statement statement = connection.createStatement()){
             statement.executeUpdate("TRUNCATE TABLE user");
         } catch (SQLException e) {
             logger.info("An error occurred while trying to clean users table" + e.getMessage());

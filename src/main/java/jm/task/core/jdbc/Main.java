@@ -9,9 +9,6 @@ public class Main {
         user.saveUser("Name3", "LastName3", (byte) 31);
         user.saveUser("Name4", "LastName4", (byte) 38);
 
-      //  user.removeUserById(1);
-        //user.getAllUsers();
-       // user.cleanUsersTable();
-       // user.dropUsersTable();
+
     }
 }
